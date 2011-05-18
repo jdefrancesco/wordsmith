@@ -88,6 +88,12 @@ def main():
     for o, a in opts:
         if o == '-w': # display word of the day, then exit.
             word_of_day(word)
+        elif o == '-r':
+            get_random_list() # Not currently implemented
+        elif o == '-d':
+            wordArgument = a # name is more clear ;-)
+            define_word(wordArgument) # variable
+        else # PICKUP
 
 # Handles command line arguments, then call main()
 if __name__ == '__main__':
