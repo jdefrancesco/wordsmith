@@ -28,6 +28,11 @@ class LogConstants(object):
 
 # Wordnik API Key: d5a58307aef66a63651080454b601a8f235f7445be04adcba
 
+# DEFINES - MOVE TO SEPERATE MODULE
+DEFAULT_DEFINITION_COUNT = 2
+DEFAULT_EXAMPLE_COUNT = 1
+
+
 def DEBUG(): print '***DEBUG***'
 
 def showHelp(): 
@@ -68,6 +73,9 @@ def word_of_day(word):
     # we exit, as we only want word of the day.
     sys.exit(0)
 
+def get_random_list(): pass
+def get_random_word(): pass
+
 def main():
 
     if len(sys.argv) < 2:
@@ -84,16 +92,32 @@ def main():
     # Create Wordnik object, Authenticate with API key (See header comment block)
     word = Wordnik('d5a58307aef66a63651080454b601a8f235f7445be04adcba')
     # Handle our options
+
+    # Number of definitions and examples to show (Default)
+    definitionCount = DEFAULT_DEFINITION_COUNT
+    exampleCount = DEFAULT_EXAMPLE_COUNT
     
     for o, a in opts:
         if o == '-w': # display word of the day, then exit.
             word_of_day(word)
-        elif o == '-r':
-            get_random_list() # Not currently implemented
+            # single option - exit
+        elif o == '-r': # get random word
+            
+            # single option - exit
+        elif o == '-l': # get random list of words
+           get_random_list()  
         elif o == '-d':
-            wordArgument = a # name is more clear ;-)
-            define_word(wordArgument) # variable
-        else # PICKUP
+            # MAKE SURE THEY SUPPLY NUMBER (RESTRICT 10)
+            # Specify how many definitions to display
+            if int(a) != DEFAULT_DEFINITION_COUNT: 
+                definitionCount = int(a)
+        elif o == '-e':
+            # CHECK IF NUMBER IS GIVEN (RESTRICT 10)
+            # Specify how many examples to display
+            if int(a) != DEFAULT_EXAMPLE_COUNT: 
+                exampleCount = int(a)
+        else:
+            print "Invalid flag <== show help"
 
 # Handles command line arguments, then call main()
 if __name__ == '__main__':
