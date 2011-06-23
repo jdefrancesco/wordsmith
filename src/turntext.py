@@ -18,14 +18,16 @@
 
 # Modules to import
 from wordnik import *
+import enchant
 
 import simplejson as json
 import sys
 import getopt
 import logging
 
+# Logging and stuff....
 class LogConstants(object):
-    LOG_FILENAME = ""
+    LOG_FILENAME = "turntext.py"
     LOG_FORMAT = "%(asctime)s:line number %(lineno)s:%(levelname)s - %(message)s"
     LEVELS = { 'debug' : logging.DEBUG,
                 'info' : logging.INFO,
@@ -33,14 +35,18 @@ class LogConstants(object):
                 'error' : logging.ERROR,
                 'critical' : logging.CRITICAL}
 
-# Wordnik API Key: d5a58307aef66a63651080454b601a8f235f7445be04adcba
+SCRIPT_NAME = 'turntext.py' # will be changed to 'tt' eventually for sake of brevity
+level_name = LogConstants.LOG_FILENAME
+log_level = LogConstants.LEVELS.get(SCRIPT_NAME, logging.NOTSET)
+logging.basicConfig(filename=LogConstants.LOG_FILENAME, level=log_level, format=LogConstants.LOG_FORMAT)
+# End Logging code
 
-# DEFINES - MOVE TO SEPERATE MODULE
+# DEFINES - WILL MOVE TO SEPERATE MODULE
 DEFAULT_DEFINITION_COUNT = 2
 DEFAULT_EXAMPLE_COUNT = 1
-
-
-def DEBUG(): print '***DEBUG***'
+# Maximum amount of defintions and examples that can be retrieved (subject to change)
+MAX_DEFINITION_COUNT = 5
+MAX_EXAMPLE_COUNT = 5
 
 def show_help(): 
 
@@ -64,24 +70,43 @@ def show_help():
             of the top rated definitions.
     """
 
-# Function: define_word(targetWord, definitionCount, exampleCount)
-# In: target word, number of definitions to return, 
+# Function: define_word(wordObj, targetWord, definitionCount, exampleCount)
+# In: 
 # Out: 
 # Description: Fetches word defintion along with example uses using the Wordnik API
-define_word(): pass
+def define_word(wordObj, targetWord, definitionCount, exampleCount): 
+  
+    if not (0 < definitionCount <= MAX_DEFINITION_COUNT):
+        print ' error -- exiting ' # temporary action 
+        sys.exit(1)
+
+    if not (0 < exampleCount <= MAX_EXAMPLE_COUNT):
+        print 'error example count invalid -- exiting' # temporary action
+        sys.exit(1) 
+
+    # Spell checking and correction options
+    spellCheck = enchant.Dict('en_US')
+    if not spellCheck.check(targetWord):
+        # TODO: allow user to chose alternative word
+        print 'tmp: Show alternatives'
+        print spellCheck.suggest(targetWord)
+
+   
+    # note: 'definitions' variable will contain a LIST, and 'examples' will be a DICT
+    definitions = wordObj.word_get_definitions(targetWord, limit=definitionCount)
+    examples = wordObj.word_get_examples(targetWord, limit=exampleCount)
+
+    return (definitions, examples)
+
 
 # word_of_day() - Display word of the day and its definition
 # Arguments: Wordnik object
-# NOTE: Function exits program.
 def word_of_day(word):
 
     # Wordnik API returns JSON data
     # function returns a dictionary
     words = word.words_get_word_of_the_day()
    
-    # NOTE: TEMPORARY TESTING OUTPUT UNTILL 
-    #       I WRITE FORMATTING AND DISPLAY
-    #       FUNCTIONS.
 
     for key, val in words.iteritems():
         print key, '=>', val
@@ -141,8 +166,11 @@ def main():
 
     # target word to define is our first (and only for now) element in args list
     targetWord = args[0]
+    definitions, examples = define_word(word, targetWord, definitionCount, exampleCount)
+    
+    logging.info('got defintions (LIST), for examples (DICT)')
 
-    define_word(targetWord, definitionCount, exampleCount)
+    #END
 
 # Handles command line arguments, then call main()
 if __name__ == '__main__':
