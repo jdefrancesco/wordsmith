@@ -17,8 +17,9 @@
 #!/usr/bin/env python
 
 # Modules to import
-from wordnik import *
-import enchant
+from wordnik import * # Turntext is built on the wordnik API
+from termcolor import colored, cprint
+import enchant # needed for spell checking
 
 import simplejson as json
 import sys
@@ -35,9 +36,9 @@ class LogConstants(object):
                 'error' : logging.ERROR,
                 'critical' : logging.CRITICAL}
 
-SCRIPT_NAME = 'turntext.py' # will be changed to 'tt' eventually for sake of brevity
+LOG_SWITCH = True
 level_name = LogConstants.LOG_FILENAME
-log_level = LogConstants.LEVELS.get(SCRIPT_NAME, logging.NOTSET)
+log_level = LogConstants.LEVELS.get('turntext_log.txt', logging.NOTSET)
 logging.basicConfig(filename=LogConstants.LOG_FILENAME, level=log_level, format=LogConstants.LOG_FORMAT)
 # End Logging code
 
@@ -69,6 +70,31 @@ def show_help():
             for a single word. Defaults to 2
             of the top rated definitions.
     """
+
+
+# Function: display_word_info(definitions, examples)
+def display_word_info(targetWord, definitions, examples):
+
+
+    if not len(definitions):
+        print 'Error -- definition count invalid' # tmp handling
+        return
+
+    if not len(examples):
+        print 'Error -- examples count invalid' # tmp handling
+        return 
+
+    # defList will hold only the definitions of the word. 
+    # Currently the variable 'definitions' has other fields
+    
+    # Variable 'definitions' is a list of dictionaries with the following six fields
+    #  -- word, sequence, text, score, partOfSpeech, sourceDictionary
+    defList = []
+    for entry in definitions:
+        defList.append(entry['text'])
+
+
+
 
 # Function: define_word(wordObj, targetWord, definitionCount, exampleCount)
 # In: 
@@ -140,25 +166,32 @@ def main():
 
     for o, a in opts:
         if o == '-w': # display word of the day, then exit.
+            if LOG_SWITCH: logging.info('[+] Word of day switch on. (-w)')
             get_word_of_day(word)
 
         elif o == '-r': # get random word
+            if LOG_SWITCH: logging.info('[+] Get random word switch on. (-r)')
             get_random_word()
 
         elif o == '-l': # get random list of words
-            get_random_list()  
+            if LOG_SWITCH: logging.info('[+] Get random list of words switch on. (-l)')
+            get_random_list() 
 
         elif o == '-d':
+            if LOG_SWITCH: logging.info('[+] Definition count switch on. (-d)')
             # MAKE SURE THEY SUPPLY NUMBER (RESTRICT 10)
             # Specify how many definitions to display
             if int(a) != DEFAULT_DEFINITION_COUNT: 
                 definitionCount = int(a)
+
         elif o == '-e':
+            if LOG_SWITCH: logging.info('[+] Examples count switch on. (-e)')
             # CHECK IF NUMBER IS GIVEN (RESTRICT 10)
             # Specify how many examples to display
             if int(a) != DEFAULT_EXAMPLE_COUNT: 
                 exampleCount = int(a)
         else:
+            logging.warning('Invalid flag provided')
             print "Invalid flag <== show help"
 
     if len(args) == 0:
@@ -167,8 +200,9 @@ def main():
     # target word to define is our first (and only for now) element in args list
     targetWord = args[0]
     definitions, examples = define_word(word, targetWord, definitionCount, exampleCount)
-    
     logging.info('got defintions (LIST), for examples (DICT)')
+
+    display_word_information(targetWord, definitions, examples)
 
     #END
 
