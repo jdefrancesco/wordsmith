@@ -73,7 +73,7 @@ def show_help():
 
 
 # Function: display_word_info(definitions, examples)
-def display_word_info(targetWord, definitions, examples):
+def display_word_info(targetWord, definitions, pronounciation, examples):
 
 
     if not len(definitions):
@@ -89,18 +89,24 @@ def display_word_info(targetWord, definitions, examples):
     
     # Variable 'definitions' is a list of dictionaries with the following six fields
     #  -- word, sequence, text, score, partOfSpeech, sourceDictionary
+
+    # using to parallel lists for simplicity sake
     defList = []
+    posList = [] # part of speech list
     for entry in definitions:
         defList.append(entry['text'])
+        posList.append(entry['text'])
 
 
+    # output (to be made way nicer) TESTING ONE TWO START HERE DEAZY!
+    print targetWord, '  ', pronunciation[0]['raw']
 
 
-# Function: define_word(wordObj, targetWord, definitionCount, exampleCount)
+# Function: fetch_word_info(wordObj, targetWord, definitionCount, exampleCount)
 # In: 
 # Out: 
 # Description: Fetches word defintion along with example uses using the Wordnik API
-def define_word(wordObj, targetWord, definitionCount, exampleCount): 
+def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount): 
   
     if not (0 < definitionCount <= MAX_DEFINITION_COUNT):
         print ' error -- exiting ' # temporary action 
@@ -117,12 +123,13 @@ def define_word(wordObj, targetWord, definitionCount, exampleCount):
         print 'tmp: Show alternatives'
         print spellCheck.suggest(targetWord)
 
-   
+    # Wordnik API calls made here.. See wordnik documentation for any details regarding arguments
     # note: 'definitions' variable will contain a LIST, and 'examples' will be a DICT
     definitions = wordObj.word_get_definitions(targetWord, limit=definitionCount)
+    pronunciation = word.word_get_pronunciations(targetWord, typeFormat=ahd) 
     examples = wordObj.word_get_examples(targetWord, limit=exampleCount)
 
-    return (definitions, examples)
+    return (definitions, pronunciation, examples)
 
 
 # word_of_day() - Display word of the day and its definition
@@ -199,10 +206,10 @@ def main():
 
     # target word to define is our first (and only for now) element in args list
     targetWord = args[0]
-    definitions, examples = define_word(word, targetWord, definitionCount, exampleCount)
+    definitions, pronunciation, examples = fetch_word_info(word, targetWord, definitionCount, exampleCount)
     logging.info('got defintions (LIST), for examples (DICT)')
 
-    display_word_information(targetWord, definitions, examples)
+    display_word_information(targetWord, definitions, pronunciation, examples)
 
     #END
 
