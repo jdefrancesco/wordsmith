@@ -28,7 +28,7 @@ import logging
 
 # Logging and stuff....
 class LogConstants(object):
-    LOG_FILENAME = "turntext.py"
+    LOG_FILENAME = "turntext.log"
     LOG_FORMAT = "%(asctime)s:line number %(lineno)s:%(levelname)s - %(message)s"
     LEVELS = { 'debug' : logging.DEBUG,
                 'info' : logging.INFO,
@@ -37,9 +37,9 @@ class LogConstants(object):
                 'critical' : logging.CRITICAL}
 
 LOG_SWITCH = True
-level_name = LogConstants.LOG_FILENAME
-log_level = LogConstants.LEVELS.get('turntext_log.txt', logging.NOTSET)
-logging.basicConfig(filename=LogConstants.LOG_FILENAME, level=log_level, format=LogConstants.LOG_FORMAT)
+logfile_name = LogConstants.LOG_FILENAME
+log_level = LogConstants.LEVELS.get(logfile_name, logging.NOTSET)
+logging.basicConfig(filename=logfile_name, level=log_level, format=LogConstants.LOG_FORMAT)
 # End Logging code
 
 # DEFINES - WILL MOVE TO SEPERATE MODULE
@@ -72,8 +72,8 @@ def show_help():
     """
 
 
-# Function: display_word_info(definitions, examples)
-def display_word_info(targetWord, definitions, pronounciation, examples):
+# Function: display_word_info(targetWord, definitions, pronunciation, examples)
+def display_word_info(targetWord, definitions, pronunciation, examples):
 
 
     if not len(definitions):
@@ -98,8 +98,15 @@ def display_word_info(targetWord, definitions, pronounciation, examples):
         posList.append(entry['text'])
 
 
+    pronounced = pronunciation[0]['raw']
     # output (to be made way nicer) TESTING ONE TWO START HERE DEAZY!
-    print targetWord, '  ', pronunciation[0]['raw']
+    print targetWord, '  ', pronounced
+
+    count = 1 # defintion number entry
+    for definition in defList:
+        print str(count) + ". ", definition
+        count += 1
+
 
 
 # Function: fetch_word_info(wordObj, targetWord, definitionCount, exampleCount)
@@ -126,7 +133,7 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
     # Wordnik API calls made here.. See wordnik documentation for any details regarding arguments
     # note: 'definitions' variable will contain a LIST, and 'examples' will be a DICT
     definitions = wordObj.word_get_definitions(targetWord, limit=definitionCount)
-    pronunciation = word.word_get_pronunciations(targetWord, typeFormat=ahd) 
+    pronunciation = wordObj.word_get_pronunciations(targetWord, typeFormat='ahd') 
     examples = wordObj.word_get_examples(targetWord, limit=exampleCount)
 
     return (definitions, pronunciation, examples)
@@ -209,7 +216,7 @@ def main():
     definitions, pronunciation, examples = fetch_word_info(word, targetWord, definitionCount, exampleCount)
     logging.info('got defintions (LIST), for examples (DICT)')
 
-    display_word_information(targetWord, definitions, pronunciation, examples)
+    display_word_info(targetWord, definitions, pronunciation, examples)
 
     #END
 
