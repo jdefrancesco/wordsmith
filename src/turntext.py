@@ -76,6 +76,7 @@ def show_help():
 def display_word_info(targetWord, definitions, pronunciation, examples):
 
 
+    if LOG_SWITCH: logging.info('Function: display_word_info()')
     if not len(definitions):
         print 'Error -- definition count invalid' # tmp handling
         return
@@ -107,14 +108,15 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
         print str(count) + ". ", definition
         count += 1
 
-
-
+    if LOG_SWITCH: logging.info('End: display_word_info() ')
+    
 # Function: fetch_word_info(wordObj, targetWord, definitionCount, exampleCount)
 # In: 
 # Out: 
 # Description: Fetches word defintion along with example uses using the Wordnik API
 def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount): 
-  
+    
+    logging.info('Function: fetch_word_info() ')
     if not (0 < definitionCount <= MAX_DEFINITION_COUNT):
         print ' error -- exiting ' # temporary action 
         sys.exit(1)
@@ -136,6 +138,7 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
     pronunciation = wordObj.word_get_pronunciations(targetWord, typeFormat='ahd') 
     examples = wordObj.word_get_examples(targetWord, limit=exampleCount)
 
+    logging.info('End: fetch_word_info()')
     return (definitions, pronunciation, examples)
 
 
@@ -159,6 +162,7 @@ def get_random_word(): pass
 
 def main():
 
+    logging.info('\n\nmain() called - program started') # remove eventually
     if len(sys.argv) < 2:
         show_help()
 
@@ -213,11 +217,11 @@ def main():
 
     # target word to define is our first (and only for now) element in args list
     targetWord = args[0]
-    definitions, pronunciation, examples = fetch_word_info(word, targetWord, definitionCount, exampleCount)
-    logging.info('got defintions (LIST), for examples (DICT)')
 
+    definitions, pronunciation, examples = fetch_word_info(word, targetWord, definitionCount, exampleCount)
     display_word_info(targetWord, definitions, pronunciation, examples)
 
+    logging.info('**END**')
     #END
 
 # Handles command line arguments, then call main()
