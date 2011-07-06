@@ -85,13 +85,12 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
         print 'Error -- examples count invalid' # tmp handling
         return 
 
+
     # defList will hold only the definitions of the word. 
     # Currently the variable 'definitions' has other fields
     
     # Variable 'definitions' is a list of dictionaries with the following six fields
     #  -- word, sequence, text, score, partOfSpeech, sourceDictionary
-
-    # using to parallel lists for simplicity sake
     defList = []
     posList = [] # part of speech list
     for entry in definitions:
@@ -106,6 +105,20 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
     count = 1 # defintion number entry
     for definition in defList:
         print str(count) + ". ", definition
+        count += 1
+
+
+    print "\nExamples\n"
+
+    # The word_get_examples() function called in fetch_word_info()
+    # Also returns a dictionary where we may not use all of the information provided.
+    # As a result exampList will contain only the example sentences needed.
+
+    exampList = examples['examples']
+    # Display examples
+    count = 1
+    for ex in exampList:
+        print str(count) + ". ", ex['text']
         count += 1
 
     if LOG_SWITCH: logging.info('End: display_word_info() ')
