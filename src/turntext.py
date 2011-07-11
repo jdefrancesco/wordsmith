@@ -51,16 +51,6 @@ MAX_EXAMPLE_COUNT = 5
 
 def show_help(): 
 
-    
-    # parse arguments, optlist contains flags and corresponding options.
-    # args becomes a list of single arguments passed to the program.
-    # Argument Line: w -- word of the day
-    #                r -- ramdom word
-    #                l -- random list of words
-    #                d -- number of definitions (Default = 2)
-    #                e -- number of examples
-
-    # TEMPORARY FOR TESTING
     print """
     python turntext.py [ARGS]
         w - display word of day
@@ -97,18 +87,21 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
         defList.append(entry['text'])
         posList.append(entry['text'])
 
-
     pronounced = pronunciation[0]['raw']
-    # output (to be made way nicer) TESTING ONE TWO START HERE DEAZY!
-    print targetWord, '  ', pronounced
+    
+    # output
+    print '\n  ', colored(targetWord, 'green', attrs=['bold']), ' ', colored(pronounced, 'yellow')
+    print '\n' # new line for neatness
 
     count = 1 # defintion number entry
     for definition in defList:
-        print str(count) + ". ", definition
+        print '\t',str(count) + ". ", definition
         count += 1
 
 
-    print "\nExamples\n"
+    print ""
+    print colored('   Examples', 'red')
+    print ""
 
     # The word_get_examples() function called in fetch_word_info()
     # Also returns a dictionary where we may not use all of the information provided.
@@ -118,7 +111,7 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
     # Display examples
     count = 1
     for ex in exampList:
-        print str(count) + ". ", ex['text']
+        print '\t',str(count), ". ", ex['text']
         count += 1
 
     if LOG_SWITCH: logging.info('End: display_word_info() ')
@@ -141,7 +134,6 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
     # Spell checking and correction options
     spellCheck = enchant.Dict('en_US')
     if not spellCheck.check(targetWord):
-        # TODO: allow user to chose alternative word
         print 'tmp: Show alternatives'
         print spellCheck.suggest(targetWord)
 
