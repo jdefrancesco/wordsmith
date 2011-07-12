@@ -10,7 +10,7 @@
 #
 # Distributed: LGPL (http://www.gnu.org/copyleft/lesser.html)
 # Written by : Joey DeFrancesco
-# Modified: May 24, 2011 @ 11:52 PM
+# Modified: July 12, 2011 @ 4:15 PM
 #
 # Wordnik API Key: d5a58307aef66a63651080454b601a8f235f7445be04adcba
 
@@ -61,6 +61,18 @@ def show_help():
             of the top rated definitions.
     """
 
+# Function: print_definitions(defList)
+# Description: prints out numbered definitions
+# Arguments: function takes a single list of definitions
+def print_definitions(defList): 
+
+    count = 1
+    for definition in defList:
+        print '\t',str(count) + ". ", definition
+        count += 1
+
+
+def print_examples(): pass
 
 # Function: display_word_info(targetWord, definitions, pronunciation, examples)
 def display_word_info(targetWord, definitions, pronunciation, examples):
@@ -89,15 +101,11 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
 
     pronounced = pronunciation[0]['raw']
     
-    # output
+    # output - word being defined and pronunciation
     print '\n  ', colored(targetWord, 'green', attrs=['bold']), ' ', colored(pronounced, 'yellow')
     print '\n' # new line for neatness
 
-    count = 1 # defintion number entry
-    for definition in defList:
-        print '\t',str(count) + ". ", definition
-        count += 1
-
+    print_definitions(defList)
 
     print ""
     print colored('   Examples', 'red')
