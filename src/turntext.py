@@ -20,6 +20,7 @@
 from wordnik import * # Turntext is built on the wordnik API
 from termcolor import colored, cprint
 import enchant # needed for spell checking
+import textwrap
 
 import simplejson as json
 import sys
@@ -61,6 +62,13 @@ def show_help():
             of the top rated definitions.
     """
 
+
+# wraps a string for nice output to terminal
+def wrap_string(textString): 
+    output = textwrap.wrap(textString, 60)
+    textString = '\n\t'.join(output)
+    return textString
+
 # Function: print_definitions(defList)
 # Description: prints out numbered definitions
 # Arguments: function takes a single list of definitions
@@ -68,11 +76,19 @@ def print_definitions(defList):
 
     count = 1
     for definition in defList:
-        print '\t',str(count) + ". ", definition
+        definition = wrap_string(definition)
+        print '\t',str(count) + ". ",  definition
         count += 1
 
 
-def print_examples(): pass
+def print_examples(exampList): 
+    
+    count = 1
+    for ex in exampList: 
+        example = wrap_string(ex['text'])
+        print '\t', str(count), ". ", example
+        count += 1
+
 
 # Function: display_word_info(targetWord, definitions, pronunciation, examples)
 def display_word_info(targetWord, definitions, pronunciation, examples):
@@ -105,6 +121,7 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
     print '\n  ', colored(targetWord, 'green', attrs=['bold']), ' ', colored(pronounced, 'yellow')
     print '\n' # new line for neatness
 
+    # prints actual definitions
     print_definitions(defList)
 
     print ""
@@ -115,18 +132,16 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
     # Also returns a dictionary where we may not use all of the information provided.
     # As a result exampList will contain only the example sentences needed.
 
-    exampList = examples['examples']
+    print_examples(examples['examples'])
     # Display examples
-    count = 1
-    for ex in exampList:
-        print '\t',str(count), ". ", ex['text']
-        count += 1
+    #count = 1
+    #for ex in exampList:
+        #print '\t',str(count), ". ", ex['text']
+#       count += 1
 
     if LOG_SWITCH: logging.info('End: display_word_info() ')
     
 # Function: fetch_word_info(wordObj, targetWord, definitionCount, exampleCount)
-# In: 
-# Out: 
 # Description: Fetches word defintion along with example uses using the Wordnik API
 def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount): 
     
@@ -139,7 +154,8 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
         print 'error example count invalid -- exiting' # temporary action
         sys.exit(1) 
 
-    # Spell checking and correction options
+
+    # Spell checking and correction options, SOME WORDS ARE NOT IN ENCHANT DICT
     spellCheck = enchant.Dict('en_US')
     if not spellCheck.check(targetWord):
         print 'tmp: Show alternatives'
@@ -157,16 +173,18 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
 
 # word_of_day() - Display word of the day and its definition
 # Arguments: Wordnik object
-def word_of_day(word):
+def get_word_of_day(word):
 
     # Wordnik API returns JSON data
     # function returns a dictionary
-    words = word.words_get_word_of_the_day()
-   
+     ret = word.words_get_word_of_the_day()
+     targetWord = ret['word'] # just fetch the word, call fetch_word_info and display
 
-    for key, val in words.iteritems():
-        print key, '=>', val
-
+     # make calls for word of day and display result
+     definitions, pronunciation, examples = fetch_word_info(word, targetWord, DEFAULT_DEFINITION_COUNT, DEFAULT_EXAMPLE_COUNT)
+     display_word_info(targetWord, definitions, pronunciation, examples)
+     
+     
 # return list of random words
 def get_random_list(): pass
 
