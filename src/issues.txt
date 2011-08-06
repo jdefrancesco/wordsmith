@@ -1,4 +1,4 @@
 TurnText - Reminders and Issues
 ===============================
 
-Issue: API calls could be slow. Still profiling
+* crash with input 'python turntext.py mongering' -- index out of range.

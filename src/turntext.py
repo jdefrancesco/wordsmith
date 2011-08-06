@@ -53,15 +53,36 @@ MAX_EXAMPLE_COUNT = 5
 def show_help(): 
 
     print """
-    python turntext.py [ARGS]
-        w - display word of day
-        r - output a single random word (fun to learn new words)
-        l - output a random list of words
-        d - number of definitions to display
-            for a single word. Defaults to 2
-            of the top rated definitions.
+    python turntext.py [FLAGS] [WORD_TO_DEFINE]
+        w - Display word of day.
+        r - Output a single random word (fun to learn new words)
+        l - Output a random list of words
+        d - Number of definitions to display
+            for a single word. If not supplied the definition
+            count will be one.
+        e - number of examples to display using supplied word.
+            If not supplied the example count will be two.
+
+        *NOTE* flags should always come BEFORE the word you wish to define
     """
 
+# Functions:  p_error(errStr), errStr will be set to a default message if not supplied
+# Description: prints out error string and exits
+def p_error(errStr):
+
+    # if no error string, set default message
+    if not errStr: errStr = "[!] Error, program exiting"
+    print errStr
+    sys.exit(1)
+
+# Function: nl(count), argument count defaults to one
+# Description: Prints new lines. Takes one parameter COUNT, the number of blank lines to output.
+def nl(count=1):
+
+    i = 0
+    while i < count:
+        print ""
+        i += 1
 
 # wraps a string for nice output to terminal
 def wrap_string(textString): 
@@ -95,13 +116,11 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
 
 
     if LOG_SWITCH: logging.info('Function: display_word_info()')
-    if not len(definitions):
-        print 'Error -- definition count invalid' # tmp handling
-        return
 
+    if not len(definitions):
+        p_error('[!] ERROR: no definitions available')
     if not len(examples):
-        print 'Error -- examples count invalid' # tmp handling
-        return 
+        p_error('[!] ERROR: no examples available')
 
 
     # defList will hold only the definitions of the word. 
@@ -115,7 +134,12 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
         defList.append(entry['text'])
         posList.append(entry['text'])
 
-    pronounced = pronunciation[0]['raw']
+
+    # pronunciation not available for some words ex. mongering
+    if(pronunciation): 
+        pronounced = pronunciation[0]['raw']
+    else:
+        pronounced = 'NONE'
     
     # output - word being defined and pronunciation
     print '\n  ', colored(targetWord, 'green', attrs=['bold']), ' ', colored(pronounced, 'yellow')
@@ -131,13 +155,9 @@ def display_word_info(targetWord, definitions, pronunciation, examples):
     # The word_get_examples() function called in fetch_word_info()
     # Also returns a dictionary where we may not use all of the information provided.
     # As a result exampList will contain only the example sentences needed.
-
     print_examples(examples['examples'])
-    # Display examples
-    #count = 1
-    #for ex in exampList:
-        #print '\t',str(count), ". ", ex['text']
-#       count += 1
+    
+    nl()
 
     if LOG_SWITCH: logging.info('End: display_word_info() ')
     
@@ -147,12 +167,12 @@ def fetch_word_info(wordObj, targetWord, definitionCount, exampleCount):
     
     logging.info('Function: fetch_word_info() ')
     if not (0 < definitionCount <= MAX_DEFINITION_COUNT):
-        print ' error -- exiting ' # temporary action 
-        sys.exit(1)
+        print 'Definition count is out of range, defaulting to', DEFAULT_DEFINITION_COUNT
+        definitionCount = DEFAULT_DEFINITION_COUNT
 
     if not (0 < exampleCount <= MAX_EXAMPLE_COUNT):
-        print 'error example count invalid -- exiting' # temporary action
-        sys.exit(1) 
+        print 'Example count is out of range, defaulting to', DEFAULT_EXAMPLE_COUNT
+        exampleCount = DEFAULT_EXAMPLE_COUNT
 
 
     # Spell checking and correction options, SOME WORDS ARE NOT IN ENCHANT DICT
@@ -214,7 +234,7 @@ def main():
     exampleCount = DEFAULT_EXAMPLE_COUNT
 
     for o, a in opts:
-        if o == '-w': # display word of the day, then exit.
+        if o == '-w': # implemented 
             if LOG_SWITCH: logging.info('[+] Word of day switch on. (-w)')
             get_word_of_day(word)
 
@@ -226,17 +246,13 @@ def main():
             if LOG_SWITCH: logging.info('[+] Get random list of words switch on. (-l)')
             get_random_list() 
 
-        elif o == '-d':
+        elif o == '-d': # implemented
             if LOG_SWITCH: logging.info('[+] Definition count switch on. (-d)')
-            # MAKE SURE THEY SUPPLY NUMBER (RESTRICT 10)
-            # Specify how many definitions to display
             if int(a) != DEFAULT_DEFINITION_COUNT: 
                 definitionCount = int(a)
 
-        elif o == '-e':
+        elif o == '-e': #implemented
             if LOG_SWITCH: logging.info('[+] Examples count switch on. (-e)')
-            # CHECK IF NUMBER IS GIVEN (RESTRICT 10)
-            # Specify how many examples to display
             if int(a) != DEFAULT_EXAMPLE_COUNT: 
                 exampleCount = int(a)
         else:
@@ -244,7 +260,7 @@ def main():
             print "Invalid flag <== show help"
 
     if len(args) == 0:
-        return 0 # no word was supplied to be defined
+        p_error('[!] Error: No word was given to lookup')
 
     # target word to define is our first (and only for now) element in args list
     targetWord = args[0]
